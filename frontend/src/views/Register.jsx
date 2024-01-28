@@ -1,4 +1,6 @@
 import { Link as ReactLink } from "react-router-dom";
+import { useState } from "react";
+import { register } from "../utils/auth";
 import {
   Box,
   Input,
@@ -13,6 +15,23 @@ import {
 export default function Register() {
   const inputMargin = "10px 5px 10px 5px";
   const placeHolderColor = "blue";
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passAuth, setPassAuth] = useState("");
+  async function handleSubmit() {
+    if (password !== confirmPassword) {
+      setPassAuth("password does not match");
+      return;
+    }
+    const userData = {
+      name: username,
+      email,
+      password,
+    };
+    const data = await register(userData);
+  }
   return (
     <>
       <Box
@@ -40,6 +59,10 @@ export default function Register() {
                 placeholder={"Username"}
                 _placeholder={{ color: placeHolderColor }}
                 type="text"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
               />
               <br />
               <Input
@@ -49,6 +72,10 @@ export default function Register() {
                 placeholder={"Email"}
                 _placeholder={{ color: placeHolderColor }}
                 type="email"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+                value={email}
               />
               <br />
               <Input
@@ -58,6 +85,10 @@ export default function Register() {
                 placeholder={"Password"}
                 _placeholder={{ color: placeHolderColor }}
                 type="password"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+                value={password}
               />
               <br />
               <Input
@@ -67,9 +98,15 @@ export default function Register() {
                 placeholder={"ConfirmPassword"}
                 _placeholder={{ color: placeHolderColor }}
                 type="password"
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                }}
+                value={confirmPassword}
               />
+              <br />
+              <Box>{passAuth}</Box>
 
-              <Button m={inputMargin} colorScheme="blue">
+              <Button onClick={handleSubmit} m={inputMargin} colorScheme="blue">
                 Register
               </Button>
             </FormControl>

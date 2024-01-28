@@ -1,4 +1,6 @@
 import { Link as ReactLink } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
 import {
   AbsoluteCenter,
   FormControl,
@@ -8,10 +10,43 @@ import {
   Flex,
   Link as ChakraLink,
 } from "@chakra-ui/react";
+import { login } from "../utils/auth";
+import { userAuthStore } from "../store/store";
 
 export default function Login() {
   const inputMargin = "10px 5px 10px 5px";
   const placeHolderColor = "blue";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [InvalidCred, SetInvalidCred] = useState("");
+  async function handleClick() {
+    try {
+      const formData = {
+        email,
+        password,
+      };
+      const response = await login(formData);
+      if (!response) {
+        SetInvalidCred("invalid credentials");
+        return;
+      }
+      const accessToken = response.data.accessToken;
+      const refreshToken = response.data.refreshToken;
+      const id = response.data._id;
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("id", id);
+      const setUser = userAuthStore((state) => state.setUser);
+      const user = {
+        username: response.data.name,
+        email: response.data.email,
+      };
+      setUser(user);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <>
       <Box
@@ -36,9 +71,13 @@ export default function Login() {
                 border="1px"
                 borderColor="black"
                 m={inputMargin}
-                placeholder={"Username"}
+                placeholder={"Email"}
                 _placeholder={{ color: placeHolderColor }}
                 type="text"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+                value={email}
               />
               <br />
               <Input
@@ -48,9 +87,15 @@ export default function Login() {
                 placeholder={"Password"}
                 _placeholder={{ color: placeHolderColor }}
                 type="password"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+                value={password}
               />
               <br />
-              <Button m={inputMargin} colorScheme="blue">
+              <Box>{InvalidCred}</Box>
+              <br />
+              <Button m={inputMargin} onClick={handleClick} colorScheme="blue">
                 Login
               </Button>
             </FormControl>
